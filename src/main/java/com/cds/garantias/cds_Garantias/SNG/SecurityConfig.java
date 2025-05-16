@@ -1,5 +1,8 @@
 package com.cds.garantias.cds_Garantias.SNG;
 
+import java.security.interfaces.RSAPublicKey;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,9 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -27,6 +27,15 @@ public class SecurityConfig {
 
     @Value("${jwt.public.key}")
     private RSAPublicKey publicKey;
+
+    @Value("${cors.allowed.origins}")
+    private List<String> allowedOrigins;
+
+    @Value("${cors.allowed.methods}")
+    private List<String> allowedMethods;
+
+    @Value("${cors.allowed.headers}")
+    private List<String> allowedHeaders;
 
     private final JwtAuthenticationFilter javaURLContextFactory;
 
@@ -40,8 +49,7 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults()) // Ativa CORS
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .csrf(csrf -> csrf.disable())
                 .addFilterBefore(javaURLContextFactory, UsernamePasswordAuthenticationFilter.class)
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
@@ -53,9 +61,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://easydata.dev2")); // Origem do frontend
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowedOrigins(allowedOrigins); // Origem do frontend
+        configuration.setAllowedMethods(allowedMethods);
+        configuration.setAllowedHeaders(allowedHeaders);
         configuration.setAllowCredentials(true); // se necessário (cookies, headers, etc.)
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
